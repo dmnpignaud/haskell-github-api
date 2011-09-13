@@ -1,22 +1,35 @@
 module GitHubUsers where 
 
 import Control.Monad (liftM)
+import Numeric (readInt)
+
 import GitHubGeneral
 import JsonParsing
 
+                
 -- List users following another user
-getFollowing :: UserName -> IO()
-getFollowing u = request4User u "following" >>= (printRequest "login")
+getFollowing :: UserName -> IO [String]
+getFollowing u = u `getLogins` "following"
 
 -- List followers of a user
-getFollowers :: UserName -> IO()
-getFollowers u = request4User u "followers" >>= (printRequest "login")
+getFollowers :: UserName -> IO [String]
+getFollowers u = u `getLogins` "followers"
 
-getNbFollowers :: UserName -> IO()
-getNbFollowers u = request4User u "" >>= (printRequest "followers")
+getNbFollowers :: UserName -> IO Int
+getNbFollowers u =  u `getNb` "followers"
 
-getNbFollowing :: UserName -> IO()
-getNbFollowing u = request4User u "" >>= (printRequest "following")
+getNbFollowing :: UserName -> IO Int
+getNbFollowing u = u `getNb` "following"
+  
+-- TODO : do we really need helpers ?
+getLogins :: UserName -> String -> IO [String]
+getLogins user relation = liftM (getStrVal "login") 
+                 (request4User user relation)
+                          
+getNb :: UserName -> String -> IO Int
+getNb user relation = liftM (rInt . head . (getStrVal relation))
+                   (request4User user "")
+  where rInt a = read (a)::Int
 
 
 {--------------------}
@@ -24,21 +37,19 @@ getNbFollowing u = request4User u "" >>= (printRequest "following")
 {--------------------}
 
 -- Check if you are following a user
-amIFollowing :: AuthTuple -> UserName -> IO ()
-amIFollowing auth u = liftM (hasfound . fst) (getStatus4Req auth [] ("user/following/" ++ u)) >>= putStrLn . show
+amIFollowing :: AuthTuple -> UserName -> IO Bool
+amIFollowing auth u = liftM (hasfound . fst) (getStatus4Req auth [] ("user/following/" ++ u))
   where hasfound nb 
           | nb == 204 = True
           | otherwise = False
 
-getKeys :: AuthTuple -> IO ()
-getKeys auth = request "user/keys/" [auth] 
-               >>= (printRequest "key")
+getKeys :: AuthTuple -> IO [GitHubKey]
+getKeys auth = liftM jsonToKeys 
+               (request "user/keys" [auth])
 
--- unexpected end of input
-getKeyByID :: AuthTuple -> Int -> IO String
-getKeyByID auth id = request ("user/keys/" ++ (show id)) [auth] 
-                     >>= return . head . (getStrVal "key") 
-
+getKeyByID :: AuthTuple -> Int -> IO GitHubKey
+getKeyByID auth id = liftM (head . jsonToKeys) (request ("user/keys/" ++ (show id)) [auth] )
+                     
 getEmails :: AuthTuple -> IO [String]
-getEmails auth = request "user/emails" [auth] >>= return . (getStrVal "")
-                 
+getEmails auth = liftM (getStrVal "")
+                 (request "user/emails" [auth])                 

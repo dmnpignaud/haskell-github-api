@@ -24,10 +24,11 @@ request4User u suffix = request ("users/" ++ u ++ suffix2) []
                        
 -- TODO : suppress the parameters                        
 request :: String -> [CurlOption] ->  IO (String)
-request s c = snd `liftM` (requestFullResp s c)
+request suffix opts  = snd `liftM` (curlGetString (urlBase ++ suffix) opts)
 
-requestFullResp :: String -> [CurlOption] ->  IO (CurlCode,String)
-requestFullResp suffix opts = curlGetString (urlBase ++ suffix) opts 
+-- requestFullResp :: String -> [CurlOption] ->  IO (CurlCode,String)
+-- requestFullResp suffix opts = curlGetString (urlBase ++ suffix) opts 
+
 --request2 :: UserName -> String                       
 --request2 suffix = simpleHTTP(getRequest ("https://api.github.com/" ++ suffix)) >>= fmap (take 100) .getResponseBody
 
@@ -36,8 +37,8 @@ requestFullResp suffix opts = curlGetString (urlBase ++ suffix) opts
 -- other options
 -- the end of the URL request
 --return the JSON result
-requestFullRespWithAuth :: AuthTuple -> [CurlOption] -> String -> IO (CurlCode,String)
-requestFullRespWithAuth auth opts suffix = requestFullResp suffix (auth:opts)
+-- requestFullRespWithAuth :: AuthTuple -> [CurlOption] -> String -> IO (CurlCode,String)
+-- requestFullRespWithAuth auth opts suffix = requestFullResp suffix (auth:opts)
 
 
 getStatus4Req :: AuthTuple -> [CurlOption] -> String -> IO (Int,String)

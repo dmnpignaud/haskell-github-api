@@ -1,0 +1,19 @@
+Requires
+- regex-tdfa 
+
+Implements the GitHub API v3.
+The API library has been created mainly for retrieval purposes. Functionnalities for user profile manipulation aren't in development yet.
+
+NOT YET IMPLEMENTED :
+
+-- USERS
+----  EMAILS
+------ (POST) Add email address(es)
+------ (DELETE) Delete email address(es)
+----  FOLLOWERS
+------ (PUT) Follow a user
+------ (DELETE) Unfollow a user
+----  KEYS
+------ (POST) Create a public key
+------ (PATCH) Update a public key
+------ (DELETE) Delete a public key
